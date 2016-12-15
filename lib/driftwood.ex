@@ -5,7 +5,8 @@ defmodule Driftwood do
 
   @default_format "$dateT$time [$level] $metadata $message\n"
 
-  defstruct level: nil
+  defstruct level: nil, format: @default_format, metadata: nil
+
   #defstruct [format: nil, metadata: nil, level: nil, colors: nil, device: nil,
              #max_buffer: nil, buffer_size: 0, buffer: [], ref: nil, output: nil]
 
@@ -55,7 +56,7 @@ defmodule Driftwood do
   end
 
   defp configure(options, state) do
-    config = configure_merge(Application.get_env(:logger, :console), options)
+    config = Keyword.merge(Application.get_env(:logger, :console), options)
     Application.put_env(:logger, :driftwood, config)
     init(config, state)
   end
