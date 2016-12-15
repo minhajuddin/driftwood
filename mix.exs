@@ -7,6 +7,8 @@ defmodule Driftwood.Mixfile do
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     description: description(),
+     package: package(),
      deps: deps()]
   end
 
@@ -17,16 +19,21 @@ defmodule Driftwood.Mixfile do
     [applications: [:logger]]
   end
 
-  # Dependencies can be Hex packages:
-  #
-  #   {:mydep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
-  #
-  # Type "mix help deps" for more examples and options
+  defp description do
+    """
+    A log viewing plug which shows the latest logs from your app
+    """
+  end
+
   defp deps do
-    []
+    [{:plug,    "~> 1.0"},
+     {:earmark, "~> 1.0",  only: :dev},
+     {:ex_doc,  "~> 0.14", only: :dev}]
+  end
+
+  defp package do
+    [maintainers: ["Khaja Minhajuddin"],
+     licenses: ["MIT"],
+     links: %{"GitHub" => "https://github.com/minhajuddin/driftwood"}]
   end
 end
