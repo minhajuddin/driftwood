@@ -35,7 +35,7 @@ defmodule Driftwood.Store do
 
   @doc false
   def init(state) do
-    :ets.new(@name, [:named_table, :set, :public,
+    :ets.new(@name, [:named_table, :duplicate_bag, :public,
                      write_concurrency: true, read_concurrency: true])
     {:ok, state}
   end

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Driftwood</title>
+    <style type="text/css" media="screen">
+      body{
+        margin: 0;
+        padding: 0;
+        font-family: monospace;
+      }
+
+      tr.log__level-error {
+        color: red;
+      }
+      tr.log__level-info {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <table>
+      <%= for [{_, log}] <- @logs do %>
+      <tr class="log log__level-<%= log.level %>">
+        <td>
+          <%= log.message %>
+        </td>
+      </tr>
+      <% end %>
+    </table>
+  </body>
+</html>

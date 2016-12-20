@@ -5,7 +5,11 @@ defmodule Driftwood.Controller do
   def init(opts), do: opts
 
   def call(conn, opts) do
-    logs = Enum.flat_map(Driftwood.Store.all, fn [{request_id, log}] -> [to_string(request_id), to_string(log.level), " ", log.message, "\n"] end)
-    send_resp(conn, 200, :erlang.iolist_to_binary(logs))
+    conn
+    |> put_resp_content_type("text/html")
+    |> send_resp(200, render_index([logs: Driftwood.Store.all]))
   end
+
+  require EEx
+  EEx.function_from_file(:defp, :render_index, Path.join(__DIR__, "templates/index.html.eex"), [:assigns], trim: true)
 end
