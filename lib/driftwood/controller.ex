@@ -1,10 +1,11 @@
 defmodule Driftwood.Controller do
   @behaviour Plug
-  import Plug.Conn
+  use Plug.Router
 
-  def init(opts), do: opts
+  plug :match
+  plug :dispatch
 
-  def call(conn, opts) do
+  get "/" do
     conn
     |> put_resp_content_type("text/html")
     |> send_resp(200, render_index([logs: Driftwood.Store.all]))
