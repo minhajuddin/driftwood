@@ -4,7 +4,7 @@ defmodule Driftwood.Backend do
 
   use GenEvent
 
-  defstruct metadata: [], level: nil
+  defstruct metadata: [], level: nil, buffer: [], buffer_logs: true
 
   def init(Backend) do
     config = Application.get_env(:logger, :driftwood) || []
@@ -21,22 +21,29 @@ defmodule Driftwood.Backend do
     {:ok, state}
   end
 
-  def handle_event({level, _gl, {Logger, message, timestamp, metadata}}, %Backend{level: log_level}=state) do
+  def handle_event({level, _gl, {Logger, message, timestamp, metadata}}, %Backend{level: log_level, buffer_logs: buffer_logs}=state) do
     cond do
       not meet_level?(level, log_level) ->
         {:ok, state}
+      buffer_logs ->
+        {:ok, buffer_log(level, message, timestamp, metadata, state)}
       true ->
         log_event(level, message, timestamp, metadata, state)
         {:ok, state}
     end
   end
 
-  def handle_event(:flush, state) do
+  def handle_event(:flush, %{buffer_logs: false} = state) do
     {:ok, state}
   end
 
+  def handle_event(:flush, %{buffer: buffer} = state) do
+    for log <- buffer, do: Driftwood.Store.save(log)
+    {:ok, %{state | buffer: [], buffer_logs: false}}
+  end
+
   def handle_event(event, state) do
-    IO.puts "UNHANDLED EVENT : #{inspect event} #{inspect state}"
+    IO.puts "DRIFTWOOD_UNHANDLED_EVENT #{inspect event} #{inspect state}"
     {:ok, state}
   end
 
@@ -47,15 +54,26 @@ defmodule Driftwood.Backend do
     Logger.compare_levels(lvl, min) != :lt
   end
 
-  def log_event(level, message, timestamp, metadata, state) do
+  defp log_event(level, message, timestamp, metadata, state) do
     request_id = Keyword.get(metadata, :request_id) || "OUT_OF_BAND"
-    Driftwood.Store.save request_id, %{
+    Driftwood.Store.save %{
       level: level,
       message: :erlang.iolist_to_binary(message),
       timestamp: timestamp,
       metadata: metadata,
       request_id: request_id,
     }
+  end
+
+  defp buffer_log(level, message, timestamp, metadata, state) do
+    request_id = Keyword.get(metadata, :request_id) || "OUT_OF_BAND"
+    %{state | buffer: [%{
+       level: level,
+       message: :erlang.iolist_to_binary(message),
+       timestamp: timestamp,
+       metadata: metadata,
+       request_id: request_id,
+     }|state.buffer] }
   end
 
 end

@@ -3,15 +3,14 @@ defmodule Driftwood.Store do
   TODO
   """
 
-  #import Driftwood.Utils
+  import Driftwood.Utils
 
   @name __MODULE__
 
   # start of client api
   # saves the log message in the :minute_requests and the :request_logs tables
-  def save(request_id, log) do
-    #now_in_minutes = unix_minutes
-    :ets.insert(@name, {request_id, log})
+  def save(log) do
+    :ets.insert(@name, {unix_minutes, log})
   end
 
   # returns all the logs
@@ -33,10 +32,13 @@ defmodule Driftwood.Store do
     GenServer.start_link(@name, [])
   end
 
+  require Logger
   @doc false
   def init(state) do
     :ets.new(@name, [:named_table, :duplicate_bag, :public,
                      write_concurrency: true, read_concurrency: true])
+
+    Logger.flush # flush as soon as our ets table is ready
     {:ok, state}
   end
 
