@@ -10,6 +10,7 @@ defmodule Dummy do
     children = [
       # Start the endpoint when the application starts
       supervisor(Dummy.Endpoint, []),
+      worker(Driftwood.Store, []),
       # Start your own worker by calling: Dummy.Worker.start_link(arg1, arg2, arg3)
       # worker(Dummy.Worker, [arg1, arg2, arg3]),
     ]

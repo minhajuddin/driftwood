@@ -19,6 +19,8 @@ defmodule Dummy.Router do
     get "/", PageController, :index
   end
 
+  forward "/logs", Driftwood.Controller
+
   # Other scopes may use custom stacks.
   # scope "/api", Dummy do
   #   pipe_through :api

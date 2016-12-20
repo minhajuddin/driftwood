@@ -48,7 +48,14 @@ defmodule Driftwood.Backend do
   end
 
   def log_event(level, message, timestamp, metadata, state) do
-    IO.puts(">> #{message}")
+    request_id = Keyword.get(metadata, :request_id) || "OUT_OF_BAND"
+    Driftwood.Store.save request_id, %{
+      level: level,
+      message: :erlang.iolist_to_binary(message),
+      timestamp: timestamp,
+      metadata: metadata,
+      request_id: request_id,
+    }
   end
 
 end
